@@ -2,7 +2,10 @@ import os
 import shutil
 import cv2 as cv
 
+
 def main():
+    successes = 0
+    total = 0
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "\DNIM\Image"
 
     groupnum = 0
@@ -24,14 +27,14 @@ def main():
             groupnum += 1
 
     for entry in os.scandir(finalrestingplace):  # iterate over every file in final
+        entry_dict = dict()
         for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
             if comparator.path != entry.path:
                 feature_detection(entry.path, comparator.path)
-    generate_summary()
+        generate_summary(entry_dict)
 
 
 def feature_detection(photo1, photo2):
-
     img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
     img2 = cv.imread(photo2, cv.IMREAD_GRAYSCALE)
     # Initiate SIFT detector
@@ -49,7 +52,8 @@ def feature_detection(photo1, photo2):
             good.append([m])
     return good
 
-def generate_summary():
+
+def generate_summary(dict):
     pass
 
 
