@@ -1,7 +1,6 @@
-import cv2
 import os
 import shutil
-
+import cv2 as cv
 
 def main():
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "\DNIM\Image"
@@ -25,16 +24,30 @@ def main():
             groupnum += 1
 
     for entry in os.scandir(finalrestingplace):  # iterate over every file in final
-        photo1 = entry  # entry is dict with key filepath and value filename
         for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
-            if comparator[0] != entry[0]:
-                feature_detection(entry, comparator)
+            if comparator.path != entry.path:
+                feature_detection(entry.path, comparator.path)
     generate_summary()
 
 
 def feature_detection(photo1, photo2):
-    pass
 
+    img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
+    img2 = cv.imread(photo2, cv.IMREAD_GRAYSCALE)
+    # Initiate SIFT detector
+    sift = cv.SIFT_create()
+    # find the keypoints and descriptors with SIFT
+    keypoints1, description1 = sift.detectAndCompute(img1, None)
+    keypoints2, description2 = sift.detectAndCompute(img2, None)
+    # BFMatcher with default params
+    bf = cv.BFMatcher()
+    matches = bf.knnMatch(description1, description2, k=2)
+    # Apply ratio test
+    good = []
+    for m, n in matches:
+        if m.distance < 0.75 * n.distance:
+            good.append([m])
+    return good
 
 def generate_summary():
     pass
