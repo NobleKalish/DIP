@@ -1,4 +1,4 @@
-
+import cv2
 
 def main():
     photo1, photo2 = None, None
