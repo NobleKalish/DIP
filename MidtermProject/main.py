@@ -38,8 +38,9 @@ def main():
         if generate_summary(entry_dict, entry.name.split('_')[0]):
             successes += 1
 
-    print(total)
-    print(successes)
+    print("Total images tested: " + total)
+    print("Images matched correctly: " + successes)
+    print("Accuracy rate: " + (successes/total)*100 + "%")
 
 
 
