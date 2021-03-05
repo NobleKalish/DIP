@@ -7,7 +7,8 @@ from collections import defaultdict
 def main():
     successes = 0
     total = 0
-    entry_dict = defaultdict(list) # key string {representing group} value list of ints {contains all matches to images in said group}
+    entry_dict = defaultdict(
+        list)  # key string {representing group} value list of ints {contains all matches to images in said group}
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "\DNIM\Image"
 
     groupnum = 0
@@ -28,9 +29,9 @@ def main():
                     picnum += 1
             groupnum += 1
 
-
     for entry in os.scandir(finalrestingplace):  # iterate over every file in final
         total += 1
+        print(f'Total is at {total}')
         for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
             currgroup = comparator.name.split('_')[0]
             if comparator.path != entry.path:
@@ -40,8 +41,7 @@ def main():
 
     print("Total images tested: " + total)
     print("Images matched correctly: " + successes)
-    print("Accuracy rate: " + (successes/total)*100 + "%")
-
+    print("Accuracy rate: " + (successes / total) * 100 + "%")
 
 
 def feature_detection(photo1, photo2):
@@ -60,7 +60,7 @@ def feature_detection(photo1, photo2):
     for m, n in matches:
         if m.distance < 0.75 * n.distance:
             good.append([m])
-    return len(good) # return number of matches between these two images
+    return len(good)  # return number of matches between these two images
 
 
 def generate_summary(dict, group):
@@ -70,7 +70,7 @@ def generate_summary(dict, group):
         sum = 0
         for elt in dict[k]:
             sum += elt
-        avg = sum/len(dict[k])
+        avg = sum / len(dict[k])
         if avg > largestAvg:
             largestGroup = k
             largestAvg = avg
