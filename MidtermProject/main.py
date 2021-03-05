@@ -5,6 +5,7 @@ from collections import defaultdict
 
 
 def main():
+    print(cv.getBuildInformation())
     successes = 0
     total = 0
     entry_dict = defaultdict(
@@ -12,7 +13,7 @@ def main():
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "\DNIM\Image"
 
     groupnum = 0
-    finalrestingplace = os.path.dirname(os.path.realpath(__file__)) + "\\final\\"
+    finalrestingplace = os.path.dirname(os.path.realpath(__file__)) + "/final/"
     finalrestingplace = os.path.normpath(finalrestingplace)
 
     createcopy = False  # CHANGE THIS TO FALSE TO PREVENT COPYING OVER!!!!!!
