@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import shutil
 import cv2 as cv
@@ -31,7 +32,7 @@ def main():
 
 
     threads = []
-    for n in range(1,18):
+    for n in range(1,10): # Noble (10,14) Tyler (14,18)
         print("Spawning thread " + str(n))
         dir = finalrestingplace + "/group" + str(n)
         dir = os.path.normpath(dir)
@@ -42,25 +43,6 @@ def main():
     for t in threads:
         t.join()
 
-    # for entry in os.scandir(finalrestingplace):  # iterate over every file in final
-    #     total += 1
-    #     for group in os.scandir(os.path.dirname(finalrestingplace)):
-    #         print(group)
-    #         for comparator in os.scandir(group.path):  # compare every other image in the set
-    #             currgroup = comparator.name.split('_')[0]
-    #             if comparator.path != entry.path:
-    #                 entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
-    #         if generate_summary(entry_dict, entry.name.split('_')[0]):
-    #             successes += 1
-    
-    # for entry in os.scandir(finalrestingplace):  # iterate over every file in final
-    #     total += 1
-    #     for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
-    #         currgroup = comparator.name.split('_')[0]
-    #         if comparator.path != entry.path:
-    #             entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
-    #     if generate_summary(entry_dict, entry.name.split('_')[0]):
-    #         successes += 1
 
 
 
@@ -71,30 +53,36 @@ def thread_func(finalrestingplace):
     
     for entry in os.scandir(finalrestingplace):  # iterate over every file in final
         total += 1
+        sift = cv.SIFT_create()
+        img1 = entry.path
+        img1 = cv.imread(img1, cv.IMREAD_GRAYSCALE)
+        keypoints1, description1 = sift.detectAndCompute(img1, None)
         print("total is at: " + str(total))
+        time = datetime.now()
+        print(time.strftime("%H:%M:%S"))
         entry_dict = defaultdict(
         list)  # key string {representing group} value list of ints {contains all matches to images in said group}
         for group in os.scandir(os.path.dirname(finalrestingplace)):
             for comparator in os.scandir(group):  # compare every other image in the set
                 currgroup = comparator.name.split('_')[0]
                 if comparator.path != entry.path:
-                    entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
+                    entry_dict[currgroup].append(feature_detection(sift, description1, comparator.path))
             if generate_summary(entry_dict, entry.name.split('_')[0]):
                 successes += 1
     
-
+    print("Report for " + os.path.basename(finalrestingplace))
     print("Total images tested: " + total)
     print("Images matched correctly: " + successes)
     print("Accuracy rate: " + (successes / total) * 100 + "%")
 
 
-def feature_detection(photo1, photo2):
-    img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
+def feature_detection(sift, description1, photo2):
+    #img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
     img2 = cv.imread(photo2, cv.IMREAD_GRAYSCALE)
     # Initiate SIFT detector
-    sift = cv.SIFT_create()
+    # sift = cv.SIFT_create()
     # find the keypoints and descriptors with SIFT
-    keypoints1, description1 = sift.detectAndCompute(img1, None)
+    #keypoints1, description1 = sift.detectAndCompute(img1, None)
     keypoints2, description2 = sift.detectAndCompute(img2, None)
     # BFMatcher with default params
     bf = cv.BFMatcher()
