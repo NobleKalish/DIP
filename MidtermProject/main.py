@@ -2,17 +2,17 @@ import os
 import shutil
 import cv2 as cv
 from collections import defaultdict
+from threading import Thread
 
 
 def main():
     successes = 0
     total = 0
-    entry_dict = defaultdict(
-        list)  # key string {representing group} value list of ints {contains all matches to images in said group}
+    
     dir_path = os.path.dirname(os.path.realpath(__file__)) + "\DNIM\Image"
 
     groupnum = 0
-    finalrestingplace = os.path.dirname(os.path.realpath(__file__)) + "\\final\\"
+    finalrestingplace = os.path.dirname(os.path.realpath(__file__)) + "/final"
     finalrestingplace = os.path.normpath(finalrestingplace)
 
     createcopy = False  # CHANGE THIS TO FALSE TO PREVENT COPYING OVER!!!!!!
@@ -29,14 +29,59 @@ def main():
                     picnum += 1
             groupnum += 1
 
+
+    threads = []
+    for n in range(1,18):
+        print("Spawning thread " + str(n))
+        dir = finalrestingplace + "/group" + str(n)
+        dir = os.path.normpath(dir)
+        t = Thread(target=thread_func, args=(dir,))
+        t.start()
+        threads.append(t)
+
+    for t in threads:
+        t.join()
+
+    # for entry in os.scandir(finalrestingplace):  # iterate over every file in final
+    #     total += 1
+    #     for group in os.scandir(os.path.dirname(finalrestingplace)):
+    #         print(group)
+    #         for comparator in os.scandir(group.path):  # compare every other image in the set
+    #             currgroup = comparator.name.split('_')[0]
+    #             if comparator.path != entry.path:
+    #                 entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
+    #         if generate_summary(entry_dict, entry.name.split('_')[0]):
+    #             successes += 1
+    
+    # for entry in os.scandir(finalrestingplace):  # iterate over every file in final
+    #     total += 1
+    #     for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
+    #         currgroup = comparator.name.split('_')[0]
+    #         if comparator.path != entry.path:
+    #             entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
+    #     if generate_summary(entry_dict, entry.name.split('_')[0]):
+    #         successes += 1
+
+
+
+
+def thread_func(finalrestingplace):
+    total = 0
+    successes = 0
+    
     for entry in os.scandir(finalrestingplace):  # iterate over every file in final
         total += 1
-        for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
-            currgroup = comparator.name.split('_')[0]
-            if comparator.path != entry.path:
-                entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
-        if generate_summary(entry_dict, entry.name.split('_')[0]):
-            successes += 1
+        print("total is at: " + str(total))
+        entry_dict = defaultdict(
+        list)  # key string {representing group} value list of ints {contains all matches to images in said group}
+        for group in os.scandir(os.path.dirname(finalrestingplace)):
+            for comparator in os.scandir(group):  # compare every other image in the set
+                currgroup = comparator.name.split('_')[0]
+                if comparator.path != entry.path:
+                    entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
+            if generate_summary(entry_dict, entry.name.split('_')[0]):
+                successes += 1
+    
 
     print("Total images tested: " + total)
     print("Images matched correctly: " + successes)
