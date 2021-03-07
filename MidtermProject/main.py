@@ -64,16 +64,16 @@ def thread_func(finalrestingplace):
         list)  # key string {representing group} value list of ints {contains all matches to images in said group}
         for group in os.scandir(os.path.dirname(finalrestingplace)):
             for comparator in os.scandir(group):  # compare every other image in the set
-                currgroup = comparator.name.split('_')[0]
+                currgroup = group.name
                 if comparator.path != entry.path:
                     entry_dict[currgroup].append(feature_detection(sift, description1, comparator.path))
-            if generate_summary(entry_dict, entry.name.split('_')[0]):
-                successes += 1
+        if generate_summary(entry_dict, os.path.basename(finalrestingplace)):
+            successes += 1
     
     print("Report for " + os.path.basename(finalrestingplace))
-    print("Total images tested: " + total)
-    print("Images matched correctly: " + successes)
-    print("Accuracy rate: " + (successes / total) * 100 + "%")
+    print("Total images tested: " + str(total))
+    print("Images matched correctly: " + str(successes))
+    print("Accuracy rate: " + str((successes / total) * 100) + "%")
 
 
 def feature_detection(sift, description1, photo2):
