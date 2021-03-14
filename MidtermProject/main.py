@@ -39,11 +39,18 @@ def main():
         for entry in os.scandir(dir):  # iterate over every file in final
             total += 1
             print(f'Total is at {total}')
-            is_entry_night_time = is_photo_night_time(entry.path)
+            image_1 = cv.imread(entry.path, cv.IMREAD_GRAYSCALE)
+            is_entry_night_time = is_photo_night_time(image_1)
+            # PRE PROCESSING IMAGE
+            # image_1 = pre_process_image(image_1)
             for comparator in os.scandir(dir):  # compare every other image in the set
                 currgroup = comparator.name.split('_')[0]
                 if comparator.path != entry.path:
-                    is_comparator_night_time = is_photo_night_time(comparator.path)
+                    image_2 = cv.imread(comparator.path, cv.IMREAD_GRAYSCALE)
+                    is_comparator_night_time = is_photo_night_time(image_2)
+                    # PRE PROCESSING IMAGE
+                    # image_2 = pre_process_image(image_2)
+
                     # entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
             # if generate_summary(entry_dict, entry.name.split('_')[0]):
             #     successes += 1
@@ -53,11 +60,14 @@ def main():
     print(f"Accuracy rate: {(successes / total) * 100} %")
 
 
-def is_photo_night_time(entry):
-    image = cv.imread(entry, cv.IMREAD_GRAYSCALE)
+def is_photo_night_time(image):
     mean_blur = cv.mean(cv.blur(image, (5, 5)))[0]
     return mean_blur < 127
 
+
+def pre_process_image(image):
+    # do preprocessing
+    return image
 
 def feature_detection(photo1, photo2):
     img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
