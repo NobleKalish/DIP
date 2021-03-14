@@ -1,6 +1,8 @@
 import os
 import shutil
 import cv2 as cv
+import numpy as np
+from matplotlib import pyplot as plt
 from collections import defaultdict
 
 
@@ -19,30 +21,42 @@ def main():
     createcopy = False  # CHANGE THIS TO FALSE TO PREVENT COPYING OVER!!!!!!
     if (createcopy):
         for root, subdirs, files in os.walk(dir_path):
-
+            os.makedirs(finalrestingplace + "\group" + str(groupnum))
             print("scanning root directory" + root)
             picnum = 1
             for f in files:
                 print(f)
                 if f.endswith(".jpg"):
                     shutil.copyfile(root + '\\' + f,
-                                    finalrestingplace + "\group" + str(groupnum) + "_pic" + str(picnum) + ".jpg")
+                                    finalrestingplace + "\group" + str(groupnum) + "\pic" + str(picnum) + ".jpg")
                     picnum += 1
             groupnum += 1
 
-    for entry in os.scandir(finalrestingplace):  # iterate over every file in final
-        total += 1
-        print(f'Total is at {total}')
-        for comparator in os.scandir(finalrestingplace):  # compare every other image in the set
-            currgroup = comparator.name.split('_')[0]
-            if comparator.path != entry.path:
-                entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
-        if generate_summary(entry_dict, entry.name.split('_')[0]):
-            successes += 1
+    for n in range(1, 18): # Noble (10,14) Tyler (14,18)
+        dir = finalrestingplace + "/group" + str(n)
+        dir = os.path.normpath(dir)
 
-    print("Total images tested: " + total)
-    print("Images matched correctly: " + successes)
-    print("Accuracy rate: " + (successes / total) * 100 + "%")
+        for entry in os.scandir(dir):  # iterate over every file in final
+            total += 1
+            print(f'Total is at {total}')
+            is_entry_night_time = is_photo_night_time(entry.path)
+            for comparator in os.scandir(dir):  # compare every other image in the set
+                currgroup = comparator.name.split('_')[0]
+                if comparator.path != entry.path:
+                    is_comparator_night_time = is_photo_night_time(comparator.path)
+                    # entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
+            # if generate_summary(entry_dict, entry.name.split('_')[0]):
+            #     successes += 1
+
+    print(f"Total images tested: {total}")
+    print(f"Images matched correctly: {successes}")
+    print(f"Accuracy rate: {(successes / total) * 100} %")
+
+
+def is_photo_night_time(entry):
+    image = cv.imread(entry, cv.IMREAD_GRAYSCALE)
+    mean_blur = cv.mean(cv.blur(image, (5, 5)))[0]
+    return mean_blur < 127
 
 
 def feature_detection(photo1, photo2):
