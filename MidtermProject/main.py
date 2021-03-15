@@ -44,7 +44,7 @@ def main():
                     picnum += 1
             groupnum += 1
 
-    for n in range(4,7):
+    for n in range(7,10):
         dir = finalrestingplace + "/group" + str(n)
         dir = os.path.normpath(dir)
         runTestSuite(dir, n)
@@ -58,26 +58,22 @@ def runTestSuite(finalrestingplace, groupNum):
         wr.writeheader()
         relativePath = "final/group" + str(groupNum) + "/"
         for img1, img2 in itertools.combinations(os.listdir(finalrestingplace),2):
-
-            img1 = pre_process_image(relativePath + img1)
-            img2 = pre_process_image(relativePath + img2)
-
-            compResult = Comparison(0,img1,is_photo_night_time(img1),
-                                    img2,is_photo_night_time(img2))
-            compResult.numMatches = feature_detection(img1, img2)
+            compResult = Comparison(0,img1,is_photo_night_time(relativePath+img1),
+                                    img2,is_photo_night_time(relativePath+img2))
+            compResult.numMatches = feature_detection(relativePath+img1, relativePath+img2)
             wr.writerow(vars(compResult))
             csv_file.flush()
 
 def is_photo_night_time(image):
-    mean_blur = cv.mean(cv.blur(cv.cvtColor(image, cv.COLOR_BGR2GRAY), (5, 5)))[0]
-    #print("Image: " + image + " mean: " + str(mean_blur))
+    mean_blur = cv.mean(cv.blur(cv.imread(image, cv.IMREAD_GRAYSCALE), (5, 5)))[0]
+    print("Image: " + image + " mean: " + str(mean_blur))
     return mean_blur > 75
 
 
 def pre_process_image(image):
     # do preprocessing
     print(image)
-    image = cv.imread("final/group15/pic29.jpg")
+    image = cv.imread(image)
 
     #cv.imshow("Original image", image)
 
@@ -100,6 +96,9 @@ def pre_process_image(image):
 
 
 def feature_detection(photo1, photo2):
+
+    photo1 = pre_process_image(photo1)
+    photo2 = pre_process_image(photo2)
 
     # Initiate SIFT detector
     sift = cv.SIFT_create()
