@@ -1,7 +1,7 @@
 import os
 import shutil
 import time
-
+import matplotlib.pyplot as plt
 import cv2 as cv
 import itertools
 import csv
@@ -44,7 +44,7 @@ def main():
                     picnum += 1
             groupnum += 1
 
-    for n in range(4,7):
+    for n in range(1,2):
         dir = finalrestingplace + "/group" + str(n)
         dir = os.path.normpath(dir)
         runTestSuite(dir, n)
@@ -62,6 +62,8 @@ def runTestSuite(finalrestingplace, groupNum):
             img1 = pre_process_image(relativePath + img1)
             img2 = pre_process_image(relativePath + img2)
 
+            exit(0)
+
             compResult = Comparison(0,img1,is_photo_night_time(relativePath + img1),
                                     img2,is_photo_night_time(relativePath + img2))
             compResult.numMatches = feature_detection(relativePath + img1, relativePath + img2)
@@ -78,18 +80,24 @@ def pre_process_image(image):
     # do preprocessing
     print(image)
     image = cv.imread(image)
+    print(image)
+
+
 
     cv.imshow("CLAHE image", image)
-    time.sleep(5)
+    cv.waitKey()
+    time.sleep(1)
     #image = cv.resize(image, (500, 600))
     image_bw = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     clahe = cv.createCLAHE(clipLimit=5)
     final_img = clahe.apply(image_bw) + 30
 
     _, ordinary_img = cv.threshold(image_bw, 155, 255, cv.THRESH_BINARY)
-    cv.imshow("ordinary threshold", ordinary_img)
-    cv.imshow("CLAHE image", final_img)
-    time.sleep(5)
+    imgplot = plt.imshow(final_img)
+    plt.show()
+    #cv.imshow("ordinary threshold", ordinary_img)
+    #cv.imshow("CLAHE image", final_img)
+    time.sleep(1)
 
     return image
 
