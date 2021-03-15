@@ -1,13 +1,21 @@
 import os
 import shutil
 import cv2 as cv
-import numpy as np
-from matplotlib import pyplot as plt
+import itertools
+import csv
 from collections import defaultdict
 
 
+class Comparison:
+    def __init__(self, numMatches, img1, isDay1, img2, isDay2):
+        self.numMatches = numMatches
+        self.img1 = img1
+        self.isDay1 = isDay1
+        self.img2 = img2
+        self.isDay2 = isDay2
+
+
 def main():
-    print(cv.getBuildInformation())
     successes = 0
     total = 0
     entry_dict = defaultdict(
@@ -32,42 +40,39 @@ def main():
                     picnum += 1
             groupnum += 1
 
-    for n in range(1, 18): # Noble (10,14) Tyler (14,18)
+    for n in range(4,7):
         dir = finalrestingplace + "/group" + str(n)
         dir = os.path.normpath(dir)
+        runTestSuite(dir, n)
 
-        for entry in os.scandir(dir):  # iterate over every file in final
-            total += 1
-            print(f'Total is at {total}')
-            image_1 = cv.imread(entry.path, cv.IMREAD_GRAYSCALE)
-            is_entry_night_time = is_photo_night_time(image_1)
-            # PRE PROCESSING IMAGE
-            # image_1 = pre_process_image(image_1)
-            for comparator in os.scandir(dir):  # compare every other image in the set
-                currgroup = comparator.name.split('_')[0]
-                if comparator.path != entry.path:
-                    image_2 = cv.imread(comparator.path, cv.IMREAD_GRAYSCALE)
-                    is_comparator_night_time = is_photo_night_time(image_2)
-                    # PRE PROCESSING IMAGE
-                    # image_2 = pre_process_image(image_2)
 
-                    # entry_dict[currgroup].append(feature_detection(entry.path, comparator.path))
-            # if generate_summary(entry_dict, entry.name.split('_')[0]):
-            #     successes += 1
+def runTestSuite(finalrestingplace, groupNum):
+    with open("results/group"+str(groupNum)+".csv", 'w') as csv_file:
 
-    print(f"Total images tested: {total}")
-    print(f"Images matched correctly: {successes}")
-    print(f"Accuracy rate: {(successes / total) * 100} %")
+        fields = ["numMatches","img1","isDay1","img2","isDay2"]
+        wr = csv.DictWriter(csv_file, delimiter=',', fieldnames=fields)
+        wr.writeheader()
+        relativePath = "final/group" + str(groupNum) + "/"
+        for img1, img2 in itertools.combinations(os.listdir(finalrestingplace),2):
+            compResult = Comparison(0,img1,is_photo_night_time(relativePath + img1),
+                                    img2,is_photo_night_time(relativePath + img2))
+            compResult.numMatches = feature_detection(relativePath + img1, relativePath + img2)
+            wr.writerow(vars(compResult))
+            csv_file.flush()
+
+
 
 
 def is_photo_night_time(image):
-    mean_blur = cv.mean(cv.blur(image, (5, 5)))[0]
-    return mean_blur < 127
+    mean_blur = cv.mean(cv.blur(cv.imread(image, cv.IMREAD_GRAYSCALE), (5, 5)))[0]
+    print("Image: " + image + " mean: " + str(mean_blur))
+    return mean_blur > 75
 
 
 def pre_process_image(image):
     # do preprocessing
     return image
+
 
 def feature_detection(photo1, photo2):
     img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
@@ -83,7 +88,7 @@ def feature_detection(photo1, photo2):
     # Apply ratio test
     good = []
     for m, n in matches:
-        if m.distance < 0.75 * n.distance:
+        if m.distance < 0.8 * n.distance:
             good.append([m])
     return len(good)  # return number of matches between these two images
 
