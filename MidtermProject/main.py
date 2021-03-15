@@ -62,24 +62,25 @@ def runTestSuite(finalrestingplace, groupNum):
             img1 = pre_process_image(relativePath + img1)
             img2 = pre_process_image(relativePath + img2)
 
-            compResult = Comparison(0,img1,is_photo_night_time(relativePath + img1),
-                                    img2,is_photo_night_time(relativePath + img2))
-            compResult.numMatches = feature_detection(relativePath + img1, relativePath + img2)
+            compResult = Comparison(0,img1,is_photo_night_time(img1),
+                                    img2,is_photo_night_time(img2))
+            compResult.numMatches = feature_detection(img1, img2)
             wr.writerow(vars(compResult))
             csv_file.flush()
 
 def is_photo_night_time(image):
-    mean_blur = cv.mean(cv.blur(cv.imread(image, cv.IMREAD_GRAYSCALE), (5, 5)))[0]
-    print("Image: " + image + " mean: " + str(mean_blur))
+    mean_blur = cv.mean(cv.blur(cv.cvtColor(image, cv.COLOR_BGR2GRAY), (5, 5)))[0]
+    #print("Image: " + image + " mean: " + str(mean_blur))
     return mean_blur > 75
 
 
 def pre_process_image(image):
     # do preprocessing
     print(image)
-    image = cv.imread(image)
+    image = cv.imread("final/group15/pic29.jpg")
 
-    cv.imshow("CLAHE image", image)
+    #cv.imshow("Original image", image)
+
     time.sleep(5)
     #image = cv.resize(image, (500, 600))
     image_bw = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
@@ -87,21 +88,24 @@ def pre_process_image(image):
     final_img = clahe.apply(image_bw) + 30
 
     _, ordinary_img = cv.threshold(image_bw, 155, 255, cv.THRESH_BINARY)
-    cv.imshow("ordinary threshold", ordinary_img)
-    cv.imshow("CLAHE image", final_img)
-    time.sleep(5)
+    #cv.imshow("ordinary threshold", ordinary_img)
+
+
+    #cv.imshow("CLAHE image", final_img)
+    #cv.waitKey()
+
+    #time.sleep(5)
 
     return image
 
 
 def feature_detection(photo1, photo2):
-    img1 = cv.imread(photo1, cv.IMREAD_GRAYSCALE)
-    img2 = cv.imread(photo2, cv.IMREAD_GRAYSCALE)
+
     # Initiate SIFT detector
     sift = cv.SIFT_create()
     # find the keypoints and descriptors with SIFT
-    keypoints1, description1 = sift.detectAndCompute(img1, None)
-    keypoints2, description2 = sift.detectAndCompute(img2, None)
+    keypoints1, description1 = sift.detectAndCompute(photo1, None)
+    keypoints2, description2 = sift.detectAndCompute(photo2, None)
     # BFMatcher with default params
     bf = cv.BFMatcher()
     matches = bf.knnMatch(description1, description2, k=2)
