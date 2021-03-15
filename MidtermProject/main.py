@@ -1,9 +1,13 @@
 import os
 import shutil
+import time
+
 import cv2 as cv
 import itertools
 import csv
 from collections import defaultdict
+
+import numpy as np
 
 
 class Comparison:
@@ -54,14 +58,15 @@ def runTestSuite(finalrestingplace, groupNum):
         wr.writeheader()
         relativePath = "final/group" + str(groupNum) + "/"
         for img1, img2 in itertools.combinations(os.listdir(finalrestingplace),2):
+
+            img1 = pre_process_image(relativePath + img1)
+            img2 = pre_process_image(relativePath + img2)
+
             compResult = Comparison(0,img1,is_photo_night_time(relativePath + img1),
                                     img2,is_photo_night_time(relativePath + img2))
             compResult.numMatches = feature_detection(relativePath + img1, relativePath + img2)
             wr.writerow(vars(compResult))
             csv_file.flush()
-
-
-
 
 def is_photo_night_time(image):
     mean_blur = cv.mean(cv.blur(cv.imread(image, cv.IMREAD_GRAYSCALE), (5, 5)))[0]
@@ -71,6 +76,21 @@ def is_photo_night_time(image):
 
 def pre_process_image(image):
     # do preprocessing
+    print(image)
+    image = cv.imread(image)
+
+    cv.imshow("CLAHE image", image)
+    time.sleep(5)
+    #image = cv.resize(image, (500, 600))
+    image_bw = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    clahe = cv.createCLAHE(clipLimit=5)
+    final_img = clahe.apply(image_bw) + 30
+
+    _, ordinary_img = cv.threshold(image_bw, 155, 255, cv.THRESH_BINARY)
+    cv.imshow("ordinary threshold", ordinary_img)
+    cv.imshow("CLAHE image", final_img)
+    time.sleep(5)
+
     return image
 
 
