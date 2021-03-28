@@ -6,7 +6,7 @@ from torchvision import datasets, transforms, models
 from torch.utils.data.sampler import SubsetRandomSampler
 import matplotlib.pyplot as plt
 
-data_dir = '~/PycharmProjects/DIP_Final/data/test'
+data_dir = './data/test'
 
 model_name = "resnet_lego_model.pth"
 
