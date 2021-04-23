@@ -10,7 +10,7 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 
 
-data_dir = './data/test'
+data_dir = 'data/train'
 
 model_name = "resnet_lego_model.pth"
 

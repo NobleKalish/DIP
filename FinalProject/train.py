@@ -6,7 +6,7 @@ from torchvision import datasets, transforms, models
 from torch.utils.data.sampler import SubsetRandomSampler
 import matplotlib.pyplot as plt
 
-data_dir = './data/test'
+data_dir = 'data/train'
 
 model_name = "resnet_lego_model.pth"
 
@@ -34,6 +34,7 @@ def load_split_train_test(datadir, valid_size=.2):
 
 def train_model(data_dir):
     trainloader, testloader = load_split_train_test(data_dir, .2)
+    print(trainloader.dataset.classes)
     device = torch.device("cuda" if torch.cuda.is_available()
                           else "cpu")
     model = models.resnet50(pretrained=True)
@@ -49,7 +50,7 @@ def train_model(data_dir):
     optimizer = optim.Adam(model.fc.parameters(), lr=0.003)
     model.to(device)
 
-    epochs = 1
+    epochs = 2
     steps = 0
     running_loss = 0
     print_every = 10
