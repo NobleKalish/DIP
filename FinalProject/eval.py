@@ -1,4 +1,4 @@
-import cv2 as cv
+# import cv2 as cv
 import numpy as np
 import torch
 from torch import nn
@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 data_dir = 'data/train'
 
-model_name = "resnet_lego_model.pth"
+model_name = "model_best.pth.tar"
 
 
 def get_random_images(num, test_transforms):
