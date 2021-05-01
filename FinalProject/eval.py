@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 data_dir = 'data/train'
 
-model_name = "model_best.pth.tar"
+model_name = "model2_best.pth.tar"
 
 
 def get_random_images(num, test_transforms):
@@ -42,8 +42,17 @@ def predict_image(image, test_transforms, device, model):
 def main():
     test_transforms = transforms.Compose([transforms.Resize(224), transforms.ToTensor(), ])
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = torch.load(model_name)
+    model_checkpoint = torch.load(model_name, map_location=torch.device('cpu'))
+    new_state_dict = dict()
+    for k, _ in model_checkpoint['state_dict'].items():
+        key = k[7:]
+        new_state_dict[key] = model_checkpoint['state_dict'][k]
+
+    model_checkpoint['state_dict'] = new_state_dict
+    model = models.resnet18()
+    model.load_state_dict(model_checkpoint['state_dict'])
     model.eval()
+
     image = None
     to_pil = transforms.ToPILImage()
     images, labels, classes = get_random_images(5, test_transforms)
