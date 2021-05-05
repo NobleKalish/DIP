@@ -10,9 +10,9 @@ from torch.autograd import Variable
 import matplotlib.pyplot as plt
 
 
-data_dir = 'data/train'
+data_dir = 'data2/train'
 
-model_name = "model2_best.pth.tar"
+model_name = "checkpoint.pth.tar"
 
 
 def get_random_images(num, test_transforms):
@@ -49,7 +49,7 @@ def main():
         new_state_dict[key] = model_checkpoint['state_dict'][k]
 
     model_checkpoint['state_dict'] = new_state_dict
-    model = models.resnet18()
+    model = models.__dict__["resnet18"](pretrained=True)
     model.load_state_dict(model_checkpoint['state_dict'])
     model.eval()
 
